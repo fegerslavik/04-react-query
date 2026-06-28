@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import ReactPaginateModule from 'react-paginate'
 import type { ReactPaginateProps } from 'react-paginate'
 import type { ComponentType } from 'react'
 import { toast } from 'react-hot-toast'
 
-import { fetchMovies, fetchPopularMovies } from '../../services/movieService'
+import { fetchMovies } from '../../services/movieService'
 import type { Movie } from '../../types/movie'
 import ErrorMessage from '../ErrorMessage/ErrorMessage'
 import Loader from '../Loader/Loader'
@@ -29,13 +29,15 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
-  const isSearchMode = query.trim().length > 0
+  const normalizedQuery = query.trim()
+  const isSearchMode = normalizedQuery.length > 0
   const notifiedQueryRef = useRef<string | null>(null)
 
   const { data, error, isError, isPending } = useQuery({
     queryKey: ['movies', query, page],
-    queryFn: () =>
-      isSearchMode ? fetchMovies(query, page) : fetchPopularMovies(page),
+    queryFn: () => fetchMovies(normalizedQuery, page),
+    enabled: isSearchMode,
+    placeholderData: keepPreviousData,
   })
 
   const movies = data?.results ?? []
@@ -101,21 +103,6 @@ export default function App() {
 
         {shouldShowMovies && (
           <MovieGrid movies={movies} onSelect={handleSelect} />
-        )}
-
-        {shouldShowPagination && (
-          <ReactPaginate
-            pageCount={totalPages}
-            pageRangeDisplayed={7}
-            marginPagesDisplayed={0}
-            breakLabel={null}
-            onPageChange={({ selected }) => setPage(selected + 1)}
-            forcePage={page - 1}
-            containerClassName={styles.pagination}
-            activeClassName={styles.active}
-            nextLabel="→"
-            previousLabel="←"
-          />
         )}
       </section>
 
