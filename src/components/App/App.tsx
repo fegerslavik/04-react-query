@@ -106,7 +106,7 @@ export default function App() {
         {shouldShowPagination && (
           <ReactPaginate
             pageCount={totalPages}
-            pageRangeDisplayed={5}
+            pageRangeDisplayed={7}
             marginPagesDisplayed={0}
             breakLabel={null}
             onPageChange={({ selected }) => setPage(selected + 1)}
